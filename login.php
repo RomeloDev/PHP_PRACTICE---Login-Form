@@ -26,20 +26,24 @@
 <?php
     include 'connect.php';
 
+    //start the session
     session_start();
 
+    //check if session is invalid or empty
     if($_SESSION['status'] == 'invalid' || empty($_SESSION['status'])){
         $_SESSION['status'] = 'invalid';
     }
-
+    //if session is valid, redirect to homepage
     if($_SESSION['status'] == 'valid'){
         echo "<script>window.location.href = 'homepage.php'</script> ";
     }
 
+    //submit form logic
     if(isset($_POST['login'])){
         $username = $_POST['username'];
         $password = $_POST['password'];
 
+        //select query prepare statement
         $query = "SELECT password FROM accounts WHERE username = ?";
         $stmt = $conn->prepare($query);
 
@@ -47,7 +51,9 @@
             die("Error preparing a statement: {$conn->error}");
         }
 
+        //bind username variable to the preparedStatement as parameters
         $stmt->bind_param("s", $username);
+        //execution
         $stmt->execute();
         $stmt->store_result();
 
@@ -55,6 +61,7 @@
             $stmt->bind_result($password_db);
             $stmt->fetch();
 
+            //check if password is valid 
             if(password_verify($password, $password_db)){
                 $_SESSION['status'] = 'valid';
                 $_SESSION['username'] = $username;
